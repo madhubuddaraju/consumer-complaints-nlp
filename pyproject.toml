@@ -1,0 +1,16 @@
+[project]
+name = "consumer-complaints-nlp"
+version = "1.0.0"
+description = "NLP on CFPB consumer complaints: product classification, template-letter detection, emerging themes and urgency triage"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "."]
+
+[tool.ruff]
+line-length = 140
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]

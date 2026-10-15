@@ -1,0 +1,32 @@
+name: Fine-tune DistilBERT
+
+on:
+  workflow_dispatch:
+    inputs:
+      train_size: { description: "Training examples", default: "20000" }
+      epochs: { description: "Epochs", default: "2" }
+
+permissions:
+  contents: write
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: |
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements.txt transformers
+      - name: Fine-tune and evaluate
+        run: python scripts/train_transformer.py --train-size "${{ inputs.train_size }}" --epochs "${{ inputs.epochs }}"
+      - name: Commit metrics
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin main
+          git add reports/transformer_metrics.json
+          git commit -m "DistilBERT results $(date -u +%Y-%m-%d)" || exit 0
+          git push
