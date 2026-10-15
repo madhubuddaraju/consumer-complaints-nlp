@@ -72,8 +72,7 @@ def main() -> None:
     start = (latest - pd.DateOffset(months=a.months)).normalize()
     window = df[df["Date received"] > start].copy()
     window["month"] = window["Date received"].dt.to_period("M")
-    sample = (window.groupby("month", group_keys=False)
-                    .apply(lambda g: g.sample(min(len(g), a.per_month), random_state=42))
+    sample = (window.sample(frac=1, random_state=42).groupby("month").head(a.per_month)
                     .drop(columns="month").sort_values("Date received"))
     if "Complaint ID" not in sample:  # the mirror drops the CFPB id; derive a stable one from the record
         key = sample["Date received"].astype(str) + sample["Company"].astype(str) + sample["Consumer complaint narrative"].str[:200]
