@@ -23,6 +23,7 @@ An NLP system over **53,276 real consumer complaints** filed with the U.S. Consu
 | Word-for-word duplicate narratives | **25%** (18,278 of 72,387), removed before modeling |
 | Near-copies of a form letter among the rest | **37%**, and **49%** in credit reporting |
 | Routing, TF-IDF + logistic regression | macro-F1 **0.649**, accuracy **0.819** on the latest 3 months |
+| Routing, fine-tuned DistilBERT (CPU budget, 11k examples) | macro-F1 **0.605**, accuracy **0.748**: the simpler model won |
 | Auto-routable at ≥90% confidence | **42%** of complaints, **93%** accurate |
 | Fastest-growing issue | hard / unauthorized credit inquiries (**z = +3.3**) |
 | Complaints describing urgent harm | **24%**; "losing my home" complaints got relief only **24%** of the time vs 38% for others |
@@ -53,7 +54,10 @@ Topics are fit on non-templated complaints, then each theme's share over the las
 **A baseline you can ship, then a transformer.** The TF-IDF + logistic regression model is exported to JSON
 (3.9 MB) and re-implemented in 40 lines of JavaScript, so the dashboard classifies text with no server. A parity
 test runs the JS in Node and checks it matches scikit-learn's probabilities to 1e-3. DistilBERT is fine-tuned
-on the same split in a GitHub Actions job (CPU) to measure what a transformer adds.
+on the same split in a GitHub Actions job (CPU) to measure what a transformer adds. On this budget (a quarter of
+the training data, 2 epochs, 192-token inputs while 39% of narratives are longer) it scored 0.044 macro-F1
+*below* the tuned baseline. Product and company names are strong keyword signals, so the cheaper model is the
+one to ship here; more data, longer inputs and a GPU are the obvious next experiment.
 
 **Rules where they need to be auditable.** Urgency is flagged with a regular-expression lexicon (foreclosure,
 identity theft, frozen funds, repossession, severe hardship) plus CFPB's Servicemember and Older American tags.

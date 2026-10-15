@@ -276,10 +276,12 @@ $("themes").innerHTML = `<thead><tr><th>Theme (top words)</th><th>Mostly about</
 const models = [["baseline", "TF-IDF + logistic regression", "#2a78d6", b]];
 if (B) models.push(["bert", "Fine-tuned DistilBERT", "#eb6834", B]);
 $("modelProse").innerHTML = `Both models are trained on ${M.split.train.from} to ${M.split.valid.to} and tested on the most recent months (${M.split.test.from} to ${M.split.test.to}), so the score reflects how they'd do on next quarter's complaints. Always guessing the most common product scores a macro-F1 of only ${M.majority_class.macro_f1.toFixed(2)}.` +
-  (B ? ` The transformer was fine-tuned on ${fmt(B.train_examples)} examples on a CPU in ${Math.round(B.minutes)} minutes.` : " Transformer results are added when its training job finishes.");
+  (B ? ` DistilBERT was fine-tuned on a CPU budget (${fmt(B.train_examples)} examples, ${B.epochs} epochs, ${Math.round(B.minutes)} minutes)` +
+    (B.macro_f1 < b.macro_f1 ? ` and <b>scored ${(b.macro_f1 - B.macro_f1).toFixed(3)} lower</b> than the tuned keyword model, which also runs in this page from a 4 MB file. Product and company names are strong keyword signals.` : ` and scored ${(B.macro_f1 - b.macro_f1).toFixed(3)} higher than the keyword model.`)
+  : " Transformer results are added when its training job finishes.");
 $("modelTable").innerHTML = `<thead><tr><th>Model</th><th class="n">Macro-F1</th><th class="n">Accuracy</th><th class="n">Weighted F1</th></tr></thead><tbody>
   <tr><td>Always predict "${Object.entries(M.class_counts_test).sort((a, b2) => b2[1] - a[1])[0][0]}"</td><td class="n">${M.majority_class.macro_f1.toFixed(3)}</td><td class="n">${M.majority_class.accuracy.toFixed(3)}</td><td class="n">–</td></tr>` +
-  models.map(([, n, c, m]) => `<tr><td><span class="chip" style="border-color:${c};color:${c}">●</span>${n}</td><td class="n"><b>${m.macro_f1.toFixed(3)}</b></td><td class="n">${m.accuracy.toFixed(3)}</td><td class="n">${m.weighted_f1.toFixed(3)}</td></tr>`).join("") + "</tbody>";
+  models.map(([, n, c, m]) => `<tr><td><span class="chip" style="border-color:${c};color:${c}">●</span>${n}</td><td class="n">${m.macro_f1 === Math.max(...models.map((x) => x[3].macro_f1)) ? `<b>${m.macro_f1.toFixed(3)}</b>` : m.macro_f1.toFixed(3)}</td><td class="n">${m.accuracy.toFixed(3)}</td><td class="n">${m.weighted_f1.toFixed(3)}</td></tr>`).join("") + "</tbody>";
 const classes = M.classes.slice().sort((a, b2) => b.per_class[b2].f1 - b.per_class[a].f1);
 $("f1Legend").innerHTML = models.map(([, n, c]) => `<span><i style="background:${c}"></i>${n}</span>`).join("");
 new Chart($("f1"), { type: "bar", data: { labels: classes.map((c) => `${c} (${fmt(b.per_class[c].support)})`),
