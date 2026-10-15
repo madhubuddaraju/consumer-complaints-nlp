@@ -1,0 +1,10 @@
+data/*
+!data/complaints.csv.gz
+!data/complaints_meta.json
+__pycache__/
+*.py[cod]
+.venv*/
+.pytest_cache/
+.ruff_cache/
+artifacts/
+.DS_Store
