@@ -1,0 +1,13 @@
+{
+  "source": "https://huggingface.co/datasets/sovai/cfpb_complaints/resolve/main/cfpb_complaints.parquet",
+  "official_export": "https://files.consumerfinance.gov/ccdb/complaints.csv.zip",
+  "parquet_sha256": "bce8c81de8a45ea0370877fae57afe4dd1ce5aaf4d5a07bb207d65f52b95aae4",
+  "fetched_at": "2026-10-15T01:17:32+00:00",
+  "narratives_total": 1435678,
+  "narratives_in_window": 739284,
+  "sampled": 72387,
+  "window_start": "2022-05-01",
+  "window_end": "2024-05-01",
+  "per_month": 3000,
+  "note": "CFPB stopped publishing narratives in August 2026; this is an archived copy."
+}
