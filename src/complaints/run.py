@@ -103,7 +103,7 @@ def run() -> dict:
     (REPORTS / "metrics.json").write_text(json.dumps(result, indent=1, default=float))
     (ARTIFACTS / "web_model.json").write_text(json.dumps(web_model.export(pipe), separators=(",", ":")))
     # a small sample of test complaints for the dashboard's "try an example" buttons
-    ex = te.assign(true=y[te.index]).groupby("true").head(3)[["true", "text"]]
+    ex = te.assign(true=y[te.index]).groupby("true").head(3)[["true", "narrative"]]
     (ARTIFACTS / "examples.json").write_text(json.dumps([{"product": p, "text": t[:1200]} for p, t in ex.itertuples(index=False)]))
     log.info("baseline test macro-F1 %.3f, accuracy %.3f (majority-class macro-F1 %.3f) in %.0fs",
              base["macro_f1"], base["accuracy"], majority["macro_f1"], time.time() - t0)

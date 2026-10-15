@@ -5,7 +5,13 @@ function makeClassifier(M) {
   const index = new Map(M.vocab.map((t, i) => [t, i]));
   const stop = new Set(M.stop);
   const [nmin, nmax] = M.ngram;
+  // same normalisation as complaints.clean.clean_text: CFPB redactions -> placeholder tokens
+  function clean(text) {
+    return text.replace(/\b(?:XX|\d{1,2})\/(?:XX|\d{1,2})\/(?:XXXX|\d{2,4})\b/g, " datetoken ")
+      .replace(/\{\$?[\d,]+(?:\.\d+)?\}/g, " moneytoken ").replace(/\bX{2,}\b/g, " ");
+  }
   function features(text) {
+    text = clean(text);
     const toks = (text.toLowerCase().match(/\b[a-z][a-z]+\b/g) || []).filter((t) => !stop.has(t));
     const tf = new Map();
     for (let n = nmin; n <= nmax; n++) {
