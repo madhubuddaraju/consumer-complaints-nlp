@@ -20,7 +20,16 @@ jobs:
         with: { python-version: "3.12" }
       - run: pip install pandas requests
       - name: Download and sample
-        run: python scripts/fetch_cfpb.py --months "${{ inputs.months || 24 }}" --per-month "${{ inputs.per_month || 3000 }}"
+        run: |
+          set -o pipefail
+          python scripts/fetch_cfpb.py --months "${{ inputs.months || 24 }}" --per-month "${{ inputs.per_month || 3000 }}" 2>&1 | tee fetch.log
+      - name: Save log for debugging
+        if: failure()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b fetch-debug
+          git add -f fetch.log && git commit -m "fetch log" && git push -f origin fetch-debug
       - name: Commit sample
         run: |
           git config user.name "github-actions[bot]"

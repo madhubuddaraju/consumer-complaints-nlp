@@ -27,7 +27,8 @@ KEEP = ["Complaint ID", "Date received", "Product", "Sub-product", "Issue", "Sub
 
 
 def download(dest: Path) -> Path:
-    with requests.get(URL, stream=True, timeout=600) as r:
+    headers = {"User-Agent": "consumer-complaints-nlp research project (github.com/madhubuddaraju/consumer-complaints-nlp)"}
+    with requests.get(URL, stream=True, timeout=600, headers=headers) as r:
         r.raise_for_status()
         with dest.open("wb") as f:
             for chunk in r.iter_content(1 << 22):
@@ -46,14 +47,24 @@ def main() -> None:
     zpath = Path(a.zip)
     if not zpath.exists():
         download(zpath)
+    print(f"zip: {zpath.stat().st_size / 1e6:.0f} MB", flush=True)
     sha = hashlib.sha256(zpath.read_bytes()).hexdigest()
     with zipfile.ZipFile(zpath) as z:
         name = next(n for n in z.namelist() if n.endswith(".csv"))
+        print("reading", name, flush=True)
         frames = []
+        # filter while streaming so memory stays small: only narratives inside the window (plus a month of slack)
+        floor = pd.Timestamp.now().normalize() - pd.DateOffset(months=a.months + 1)
         with z.open(name) as fh:
-            for chunk in pd.read_csv(io.TextIOWrapper(fh, encoding="utf-8"), usecols=KEEP, dtype=str, chunksize=200_000):
+            reader = pd.read_csv(io.TextIOWrapper(fh, encoding="utf-8"), dtype=str, chunksize=100_000,
+                                 on_bad_lines="skip")
+            for i, chunk in enumerate(reader):
+                if i == 0:
+                    print("columns:", list(chunk.columns), flush=True)
+                chunk = chunk[[c for c in KEEP if c in chunk.columns]]
                 chunk = chunk[chunk["Consumer complaint narrative"].notna()]
-                frames.append(chunk)
+                d = pd.to_datetime(chunk["Date received"], errors="coerce")
+                frames.append(chunk[d >= floor])
     df = pd.concat(frames, ignore_index=True)
     df["Date received"] = pd.to_datetime(df["Date received"])
     latest = df["Date received"].max()
