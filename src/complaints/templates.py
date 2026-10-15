@@ -20,7 +20,8 @@ THRESHOLD = 0.6
 def nearest_similarity(texts: pd.Series, block: int = 1000) -> np.ndarray:
     # trigrams shared by more than 2% of complaints ("on my credit") say nothing about copying and make
     # the similarity matrix dense, so they are dropped
-    vec = TfidfVectorizer(ngram_range=(3, 3), min_df=2, max_df=0.02, sublinear_tf=True, max_features=300_000,
+    max_df = 0.02 if len(texts) >= 1000 else 1.0  # tiny inputs (tests) have no "common" trigrams to drop
+    vec = TfidfVectorizer(ngram_range=(3, 3), min_df=2, max_df=max_df, sublinear_tf=True, max_features=300_000,
                           token_pattern=r"(?u)\b[a-z][a-z]+\b")
     x = vec.fit_transform(texts)
     xt = x.T.tocsr()
@@ -34,13 +35,19 @@ def nearest_similarity(texts: pd.Series, block: int = 1000) -> np.ndarray:
     return best
 
 
+LAW = r"(?i)\bfcra\b|fair credit reporting|fair debt collection|\bsection \d|\bu\.?s\.?c\b|\b1681"
+
+
 def summarise(df: pd.DataFrame, sim: np.ndarray) -> dict:
     t = df.assign(templated=sim >= THRESHOLD)
+    cites = t.text.str.contains(LAW)
     by_product = t.groupby("product").templated.agg(["mean", "size"]).sort_values("mean", ascending=False)
     by_month = t.groupby("month").templated.mean()
     return {
         "threshold": THRESHOLD,
         "share": float(t.templated.mean()),
+        "cites_law_templated": float(cites[t.templated].mean()),
+        "cites_law_original": float(cites[~t.templated].mean()),
         "by_product": [{"product": p, "share": float(r["mean"]), "complaints": int(r["size"])} for p, r in by_product.iterrows()],
         "by_month": {"months": by_month.index.tolist(), "share": by_month.round(4).tolist()},
     }

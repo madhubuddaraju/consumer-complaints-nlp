@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Complaint Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: an investigations desk on white - newspaper masthead, a live classifier as the lead story,
+   then findings in a two-column evidence grid. Single light theme by design. */
+:root {
+  color-scheme: light;
+  --bg: #ffffff; --ink: #14161a; --ink-2: #4a4f57; --ink-3: #8c9199; --line: #e5e6e9; --soft: #f6f6f4;
+  --marker: #fde68a; --marker-2: #fef3c7; --accent: #1d4ed8; --red: #b91c1c; --green: #15803d;
+  --c1: #2a78d6; --c2: #eb6834; --c3: #1baf7a; --c4: #eda100; --c5: #e87ba4; --c6: #6250d6; --c7: #e34948; --c8: #008300;
+  --f-display: "Newsreader", Georgia, "Times New Roman", serif;
+  --f-body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --f-data: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+* { box-sizing: border-box; }
+html { background: var(--bg); padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.55 var(--f-body); }
+.mono, td.n, .num { font-family: var(--f-data); font-variant-numeric: tabular-nums; }
+.wrap { max-width: 1160px; margin: 0 auto; padding-left: max(18px, env(safe-area-inset-left, 0px)); padding-right: max(18px, env(safe-area-inset-right, 0px)); }
+.mast { border-bottom: 3px double var(--ink); }
+.mast .wrap { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-block: 14px 10px; flex-wrap: wrap; }
+.mast .name { font-family: var(--f-display); font-size: 26px; font-weight: 600; letter-spacing: -0.01em; }
+.mast .meta { font-size: 12.5px; color: var(--ink-3); font-family: var(--f-data); }
+.mast a { color: var(--ink-2); }
+.lead { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; padding-block: 28px 30px; border-bottom: 1px solid var(--line); }
+.kicker { font-size: 12px; letter-spacing: .09em; text-transform: uppercase; color: var(--red); font-weight: 700; }
+h1 { font-family: var(--f-display); font-weight: 600; font-size: clamp(30px, 4.2vw, 46px); line-height: 1.06; letter-spacing: -0.015em; margin: 8px 0 12px; text-wrap: balance; }
+.dek { color: var(--ink-2); font-size: 16.5px; margin: 0 0 16px; max-width: 58ch; }
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--ink); }
+.stat { padding: 12px 12px 12px 0; border-bottom: 1px solid var(--line); display: grid; gap: 2px; }
+.stat:nth-child(odd) { border-right: 1px solid var(--line); }
+.stat:nth-child(even) { padding-left: 14px; }
+.stat b { font-family: var(--f-display); font-size: 32px; font-weight: 600; line-height: 1.1; }
+.stat span { font-size: 13px; color: var(--ink-2); }
+
+.desk { border: 1px solid var(--ink); border-radius: 4px; padding: 16px; display: grid; gap: 12px; align-content: start; background: #fff; box-shadow: 6px 6px 0 var(--soft); }
+.desk h2 { margin: 0; font-family: var(--f-display); font-size: 21px; font-weight: 600; }
+.desk p { margin: 0; color: var(--ink-2); font-size: 13.5px; }
+textarea { width: 100%; min-height: 140px; resize: vertical; font: 14px/1.5 var(--f-body); color: var(--ink); padding: 10px 12px; border: 1px solid var(--line); border-radius: 4px; background: var(--soft); }
+textarea:focus-visible, button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ex { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.ex span { font-size: 12px; color: var(--ink-3); }
+.ex button { font: inherit; font-size: 12.5px; padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px; background: #fff; cursor: pointer; color: var(--ink-2); }
+.ex button:hover { border-color: var(--ink-3); color: var(--ink); }
+.verdict { display: grid; gap: 8px; }
+.verdict .top { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.verdict .top b { font-family: var(--f-display); font-size: 24px; font-weight: 600; }
+.conf { font-family: var(--f-data); font-size: 12px; padding: 2px 8px; border-radius: 4px; }
+.conf.hi { background: #dcfce7; color: var(--green); } .conf.mid { background: var(--marker-2); color: #92400e; } .conf.lo { background: #fee2e2; color: var(--red); }
+.probs { display: grid; gap: 4px; }
+.prob { display: grid; grid-template-columns: 130px minmax(0, 1fr) 46px; gap: 8px; align-items: center; font-size: 12.5px; }
+.prob .bar { height: 8px; background: var(--soft); border-radius: 4px; overflow: hidden; }
+.prob .bar i { display: block; height: 100%; background: var(--ink); border-radius: 4px; }
+.prob.best .bar i { background: var(--accent); }
+.prob .v { font-family: var(--f-data); text-align: right; color: var(--ink-2); }
+.why { font-size: 13px; color: var(--ink-2); }
+.why mark { background: var(--marker); padding: 0 3px; border-radius: 2px; color: var(--ink); }
+.flags { display: flex; flex-wrap: wrap; gap: 6px; }
+.flag { font-size: 12px; padding: 3px 8px; border-radius: 4px; background: #fee2e2; color: var(--red); font-weight: 600; }
+.flag.ok { background: var(--soft); color: var(--ink-2); font-weight: 500; }
+
+.section { padding-block: 26px; border-bottom: 1px solid var(--line); }
+.sh { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.sh h2 { margin: 0; font-family: var(--f-display); font-size: 26px; font-weight: 600; letter-spacing: -0.01em; }
+.sh .num-k { font-family: var(--f-data); font-size: 12px; color: var(--ink-3); }
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; }
+.prose { color: var(--ink-2); max-width: 62ch; margin: 0 0 12px; }
+.prose b { color: var(--ink); }
+.chart { position: relative; height: 290px; }
+.chart.tall { height: 340px; }
+.cap { font-size: 12.5px; color: var(--ink-3); margin: 6px 0 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12.5px; color: var(--ink-2); margin-bottom: 8px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
+.scroll { overflow-x: auto; min-width: 0; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th { text-align: left; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; padding: 7px 8px; border-bottom: 1px solid var(--ink); white-space: nowrap; }
+th.sortable { cursor: pointer; } th.sortable:hover { color: var(--ink); }
+td { padding: 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th.n, td.n { text-align: right; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+.chip { display: inline-block; font-size: 11.5px; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink-2); margin: 0 4px 2px 0; white-space: nowrap; }
+.z { font-family: var(--f-data); font-size: 12px; padding: 2px 7px; border-radius: 4px; }
+.z.up { background: #fee2e2; color: var(--red); } .z.flat { background: var(--soft); color: var(--ink-2); } .z.down { background: #dcfce7; color: var(--green); }
+.spark { width: 110px; height: 26px; display: block; }
+.minibar { display: inline-block; height: 7px; border-radius: 4px; background: var(--ink); vertical-align: middle; margin-right: 8px; }
+.seg { display: inline-flex; border: 1px solid var(--ink); border-radius: 4px; overflow: hidden; }
+.seg button { font: inherit; font-size: 12.5px; padding: 5px 11px; border: 0; background: #fff; cursor: pointer; color: var(--ink-2); }
+.seg button + button { border-left: 1px solid var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+.method { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.method div { border-top: 2px solid var(--ink); padding-top: 8px; font-size: 13.5px; color: var(--ink-2); }
+.method b { display: block; color: var(--ink); margin-bottom: 2px; }
+footer { padding-block: 22px 44px; font-size: 12.5px; color: var(--ink-3); display: grid; gap: 4px; }
+footer a { color: var(--ink-2); }
+@media (max-width: 900px) { .lead, .cols { grid-template-columns: 1fr; } .method { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .stats { grid-template-columns: 1fr; } .stat:nth-child(odd) { border-right: 0; } .stat:nth-child(even) { padding-left: 0; }
+  .prob { grid-template-columns: 100px minmax(0, 1fr) 40px; } .method { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header class="mast"><div class="wrap">
+  <span class="name">The Complaint Desk</span>
+  <span class="meta" id="mastMeta"></span>
+</div></header>
+
+<main class="wrap">
+  <section class="lead">
+    <div>
+      <span class="kicker">NLP on CFPB consumer complaints</span>
+      <h1 id="h1"></h1>
+      <p class="dek" id="dek"></p>
+      <div class="stats" id="stats"></div>
+    </div>
+    <div class="desk" aria-labelledby="deskTitle">
+      <h2 id="deskTitle">Route a complaint</h2>
+      <p>Paste or type a complaint. The model reads it in your browser (nothing is sent anywhere), predicts which product it is about, shows the words that drove the decision and flags urgent harms.</p>
+      <label for="txt" class="sr" style="position:absolute;left:-9999px">Complaint text</label>
+      <textarea id="txt"></textarea>
+      <div class="ex" id="examples"><span>Try a real one:</span></div>
+      <div class="verdict" id="verdict" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="sh"><h2>A third of complaints are form letters</h2><span class="num-k">Template letters</span></div>
+    <div class="cols">
+      <div>
+        <p class="prose" id="tmplProse"></p>
+        <div class="chart"><canvas id="tmplProd" role="img" aria-label="Share of complaints that are near-copies, by product"></canvas></div>
+      </div>
+      <div>
+        <div class="chart"><canvas id="tmplMonth" role="img" aria-label="Share of templated complaints per month"></canvas></div>
+        <p class="cap">Near-copy = word-trigram TF-IDF cosine similarity of at least <span id="thr"></span> with another complaint, after word-for-word duplicates were removed.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="sh"><h2>What people are complaining about more</h2><span class="num-k">Topic model · emerging themes</span></div>
+    <p class="prose">Themes found by topic modeling (NMF) on original, non-templated complaints. Each theme's share of complaints in the last 3 months is compared with the 9 months before; a z-score above 2 marks unusual growth.</p>
+    <div class="scroll"><table id="themes"></table></div>
+  </section>
+
+  <section class="section">
+    <div class="sh"><h2>How well can text alone route a complaint?</h2><span class="num-k">Temporal hold-out</span></div>
+    <div class="cols">
+      <div>
+        <p class="prose" id="modelProse"></p>
+        <div class="scroll"><table id="modelTable"></table></div>
+      </div>
+      <div>
+        <div class="legend" id="f1Legend"></div>
+        <div class="chart tall"><canvas id="f1" role="img" aria-label="F1 score by product class"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="sh"><h2>Urgent harms, and who gets relief</h2><span class="num-k">Triage rules</span></div>
+    <div class="cols">
+      <div>
+        <p class="prose" id="urgProse"></p>
+        <div class="chart"><canvas id="urg" role="img" aria-label="Relief rate by type of harm"></canvas></div>
+      </div>
+      <div>
+        <div class="sh" style="margin-bottom:8px"><h2 style="font-size:19px">Companies with the most complaints</h2><span class="num-k">click a column to sort</span></div>
+        <div class="scroll"><table id="companies"></table></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="sh"><h2>Method</h2></div>
+    <div class="method">
+      <div><b>Data</b>Archived CFPB narratives, sampled per month; duplicates removed; scrubbing artifacts normalised.</div>
+      <div><b>Split</b>Temporal: train on older months, test on the latest 3. Harder than a random split, and closer to real use.</div>
+      <div><b>Models</b>TF-IDF + logistic regression (runs in this page) vs fine-tuned DistilBERT, same test set.</div>
+      <div><b>Analysis</b>Near-duplicate detection, NMF topics with growth z-scores, auditable urgency rules.</div>
+    </div>
+  </section>
+
+  <footer id="foot"></footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+__CLASSIFIER_JS__
+</script>
+<script>
+const D = __DATA__;
+const M = D.metrics, B = D.bert;
+const $ = (id) => document.getElementById(id);
+const pct = (x, d = 0) => (x * 100).toFixed(d) + "%";
+const fmt = (x) => Math.round(x).toLocaleString("en-US");
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
+const tip = { backgroundColor: "#14161a", titleColor: "#fff", bodyColor: "#e5e6e9", padding: 10, cornerRadius: 4, displayColors: false };
+const ax = (title, cb) => ({ grid: { color: "#eeeff1", drawTicks: false }, border: { display: false }, ticks: { color: "#5b6068", padding: 6, callback: cb },
+  title: { display: !!title, text: title, color: "#8c9199" } });
+const themeLabel = (terms) => { const out = []; for (const t of terms) { if (!out.some((o) => o.includes(t) || t.includes(o))) out.push(t); if (out.length === 3) break; } return out.join(" · "); };
+
+// ---- header ----------------------------------------------------------------------------
+const d = M.data, t = M.templates, u = M.urgency, b = M.baseline;
+$("mastMeta").innerHTML = `${fmt(d.kept)} complaints · ${d.months[0]} to ${d.months[1]} · <a href="https://github.com/madhubuddaraju/consumer-complaints-nlp">code</a>`;
+$("h1").textContent = `What ${fmt(Math.round(d.kept / 1000) * 1000)} consumer complaints say about America's lenders`;
+$("dek").textContent = `An NLP read of narratives filed with the Consumer Financial Protection Bureau: which product each complaint is about, how many are copied form letters, which problems are growing, and whether urgent harms get help. The CFPB stopped publishing these narratives in August 2026; this analysis uses an archived copy.`;
+const best = B && B.macro_f1 > b.macro_f1 ? B : null;
+$("stats").innerHTML = [
+  [pct(t.exact_duplicates_removed / d.rows), "of narratives were word-for-word copies"],
+  [pct(t.share), "of the rest are near-copies of a form letter"],
+  [pct(b.confidence_coverage["0.9"].share), `routed automatically at ${pct(b.confidence_coverage["0.9"].accuracy)} accuracy`],
+  [pct(u.urgent_share), "describe an urgent harm such as foreclosure or fraud"],
+].map(([v, l]) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`).join("");
+
+// ---- live classifier ---------------------------------------------------------------------
+const clf = makeClassifier(D.model);
+const URG = [["Losing home", /foreclos\w*|evict\w*|sheriff sale|lose (?:my|our) home|homeless/i],
+  ["Fraud or identity theft", /identity theft|stolen identity|\bscam\w*|fraudulent(?:ly)? (?:charge|account|transaction)s?|unauthori[sz]ed (?:charge|transaction|withdrawal|account)s?/i],
+  ["Lost access to money", /account (?:was )?(?:frozen|closed|locked|restricted)|can ?not access (?:my )?(?:funds|money|account)|funds (?:are )?(?:on hold|being held)|garnish\w*|levy/i],
+  ["Vehicle or property seized", /repossess\w*|\brepo\b|towed/i],
+  ["Severe hardship", /bankrupt\w*|medical (?:bills?|debt|emergency)|cancer|disabilit\w*|suicid\w*|can'?t (?:afford|pay) (?:rent|food|bills)/i]];
+function classify() {
+  const text = $("txt").value.trim();
+  if (text.length < 20) { $("verdict").innerHTML = `<p class="why">Type at least a sentence to see a prediction.</p>`; return; }
+  const r = clf.predict(text);
+  const order = r.probs.map((p, i) => [p, i]).sort((a, b) => b[0] - a[0]);
+  const p = r.probs[r.best];
+  const level = p >= 0.9 ? ["hi", "high confidence: route automatically"] : p >= 0.6 ? ["mid", "medium confidence: suggest to an analyst"] : ["lo", "low confidence: needs a person"];
+  const words = r.terms.filter((x) => x[1] > 0).slice(0, 6).map((x) => `<mark>${esc(x[0])}</mark>`).join(" ");
+  const flags = URG.filter(([, rx]) => rx.test(text)).map(([n, rx]) => `<span class="flag">${n}: “${esc(text.match(rx)[0])}”</span>`);
+  $("verdict").innerHTML = `<div class="top"><b>${r.classes[r.best]}</b><span class="conf ${level[0]}">${pct(p)} · ${level[1]}</span></div>
+    <div class="probs">${order.slice(0, 5).map(([pp, i]) => `<div class="prob ${i === r.best ? "best" : ""}"><span>${r.classes[i]}</span><span class="bar"><i style="width:${(pp * 100).toFixed(1)}%"></i></span><span class="v">${pct(pp)}</span></div>`).join("")}</div>
+    <div class="why">${words ? `Words that pointed to <b>${r.classes[r.best]}</b>: ${words}` : "No strongly indicative words found."}</div>
+    <div class="flags">${flags.length ? flags.join("") : '<span class="flag ok">No urgent-harm phrases found</span>'}</div>`;
+}
+let timer; $("txt").addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(classify, 150); });
+const pick = {}; for (const e of D.examples) if (!pick[e.product]) pick[e.product] = e;
+const exList = ["Mortgage", "Debt collection", "Credit card", "Bank account", "Vehicle loan", "Student loan"].filter((p) => pick[p]);
+$("examples").innerHTML += exList.map((p) => `<button type="button" data-p="${p}">${p}</button>`).join("");
+$("examples").addEventListener("click", (e) => { const bt = e.target.closest("button"); if (!bt) return; $("txt").value = pick[bt.dataset.p].text; classify(); });
+$("txt").value = pick["Mortgage"]?.text || D.examples[0].text; classify();
+
+// ---- templates ------------------------------------------------------------------------------
+$("thr").textContent = t.threshold;
+$("tmplProse").innerHTML = `Before modeling, <b>${fmt(t.exact_duplicates_removed)}</b> of ${fmt(d.rows)} sampled narratives were removed as exact duplicates. Of the rest, <b>${pct(t.share)}</b> are near-copies of another complaint, rising to <b>${pct(t.by_product[0].share)}</b> for ${t.by_product[0].product.toLowerCase()}. ${pct(t.cites_law_templated)} of these cite consumer-protection law, against ${pct(t.cites_law_original)} of original complaints. Copies inflate complaint counts against particular companies, and would inflate model accuracy if they leaked across the train/test split.`;
+const tp = t.by_product.filter((r) => r.complaints >= 150);
+new Chart($("tmplProd"), { type: "bar", data: { labels: tp.map((r) => r.product), datasets: [{ data: tp.map((r) => r.share * 100), backgroundColor: tp.map((r, i) => i === 0 ? "#b91c1c" : "#14161a"), borderRadius: 3, barPercentage: 0.7 }] },
+  options: { indexAxis: "y", responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false }, tooltip: { ...tip, callbacks: { label: (c) => ` ${c.parsed.x.toFixed(1)}% of ${fmt(tp[c.dataIndex].complaints)} complaints` } } },
+    scales: { x: { ...ax("% near-copies", (v) => v + "%"), max: 60 }, y: { grid: { display: false }, ticks: { color: "#14161a" } } } } });
+new Chart($("tmplMonth"), { type: "line", data: { labels: t.by_month.months, datasets: [{ data: t.by_month.share.map((v) => v * 100), borderColor: "#b91c1c", borderWidth: 2.5, pointRadius: 0, tension: 0.25, fill: { target: "origin", above: "rgba(185,28,28,0.06)" } }] },
+  options: { responsive: true, maintainAspectRatio: false, animation: false, interaction: { mode: "index", intersect: false }, plugins: { legend: { display: false }, tooltip: { ...tip, callbacks: { label: (c) => ` ${c.parsed.y.toFixed(1)}% templated` } } },
+    scales: { x: { grid: { display: false }, ticks: { color: "#5b6068", maxRotation: 0, autoSkipPadding: 24 } }, y: { ...ax("% of the month's complaints", (v) => v + "%"), min: 0, max: 60 } } } });
+
+// ---- themes ----------------------------------------------------------------------------------
+function sparkSvg(vals) {
+  const w = 110, h = 26, mx = Math.max(...vals), mn = Math.min(...vals);
+  const pts = vals.map((v, i) => `${(i / (vals.length - 1) * (w - 4) + 2).toFixed(1)},${(h - 3 - (v - mn) / (mx - mn || 1) * (h - 6)).toFixed(1)}`).join(" ");
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="#14161a" stroke-width="1.6"/></svg>`;
+}
+const th = [...M.themes].sort((a, b2) => b2.z - a.z);
+$("themes").innerHTML = `<thead><tr><th>Theme (top words)</th><th>Mostly about</th><th class="n">Share, last 3 mo</th><th class="n">vs baseline</th><th class="n">z</th><th>24 months</th></tr></thead><tbody>` +
+  th.map((x) => { const cls = x.z >= 2 ? "up" : x.z <= -2 ? "down" : "flat";
+    return `<tr><td><b>${esc(themeLabel(x.terms))}</b><div style="color:var(--ink-3);font-size:12px">${esc(x.terms.slice(0, 8).join(", "))}</div></td>
+      <td>${Object.entries(x.products).slice(0, 2).map(([p, s]) => `<span class="chip">${p} ${pct(s)}</span>`).join("")}</td>
+      <td class="n">${pct(x.recent_share, 1)}</td><td class="n">${x.ratio.toFixed(2)}x</td><td class="n"><span class="z ${cls}">${x.z >= 0 ? "+" : ""}${x.z.toFixed(1)}</span></td>
+      <td>${sparkSvg(M.theme_shares.series[String(x.id)])}</td></tr>`; }).join("") + "</tbody>";
+
+// ---- models ------------------------------------------------------------------------------------
+const models = [["baseline", "TF-IDF + logistic regression", "#2a78d6", b]];
+if (B) models.push(["bert", "Fine-tuned DistilBERT", "#eb6834", B]);
+$("modelProse").innerHTML = `Both models are trained on ${M.split.train.from} to ${M.split.valid.to} and tested on the most recent months (${M.split.test.from} to ${M.split.test.to}), so the score reflects how they'd do on next quarter's complaints. Always guessing the most common product scores a macro-F1 of only ${M.majority_class.macro_f1.toFixed(2)}.` +
+  (B ? ` The transformer was fine-tuned on ${fmt(B.train_examples)} examples on a CPU in ${Math.round(B.minutes)} minutes.` : " Transformer results are added when its training job finishes.");
+$("modelTable").innerHTML = `<thead><tr><th>Model</th><th class="n">Macro-F1</th><th class="n">Accuracy</th><th class="n">Weighted F1</th></tr></thead><tbody>
+  <tr><td>Always predict "${Object.entries(M.class_counts_test).sort((a, b2) => b2[1] - a[1])[0][0]}"</td><td class="n">${M.majority_class.macro_f1.toFixed(3)}</td><td class="n">${M.majority_class.accuracy.toFixed(3)}</td><td class="n">–</td></tr>` +
+  models.map(([, n, c, m]) => `<tr><td><span class="chip" style="border-color:${c};color:${c}">●</span>${n}</td><td class="n"><b>${m.macro_f1.toFixed(3)}</b></td><td class="n">${m.accuracy.toFixed(3)}</td><td class="n">${m.weighted_f1.toFixed(3)}</td></tr>`).join("") + "</tbody>";
+const classes = M.classes.slice().sort((a, b2) => b.per_class[b2].f1 - b.per_class[a].f1);
+$("f1Legend").innerHTML = models.map(([, n, c]) => `<span><i style="background:${c}"></i>${n}</span>`).join("");
+new Chart($("f1"), { type: "bar", data: { labels: classes.map((c) => `${c} (${fmt(b.per_class[c].support)})`),
+  datasets: models.map(([, n, c, m]) => ({ label: n, data: classes.map((k) => m.per_class[k]?.f1 ?? null), backgroundColor: c, borderRadius: 3, barPercentage: 0.85, categoryPercentage: 0.75 })) },
+  options: { indexAxis: "y", responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false }, tooltip: { ...tip, displayColors: true, callbacks: { label: (c) => ` ${c.dataset.label}: F1 ${c.parsed.x.toFixed(2)}` } } },
+    scales: { x: { ...ax("F1 on the latest 3 months (test complaints in brackets)"), min: 0, max: 1 }, y: { grid: { display: false }, ticks: { color: "#14161a", font: { size: 11.5 } } } } } });
+
+// ---- urgency + companies ---------------------------------------------------------------------------
+const home = u.by_category.find((r) => r.category === "Losing home"), fraud = u.by_category.find((r) => r.category === "Fraud or identity theft");
+$("urgProse").innerHTML = `<b>${pct(u.urgent_share)}</b> of complaints describe a serious harm, matched by an auditable phrase list. Fraud and identity theft is the largest group (${fmt(fraud.complaints)} complaints). Complaints about <b>losing a home got relief only ${pct(home.relief_rate)}</b> of the time, against ${pct(u.relief_other)} for non-urgent complaints. "Relief" means the company closed the complaint with monetary or non-monetary relief.`;
+const ur = [...u.by_category].sort((a, b2) => b2.relief_rate - a.relief_rate);
+new Chart($("urg"), { type: "bar", data: { labels: ur.map((r) => r.category), datasets: [{ data: ur.map((r) => r.relief_rate * 100), backgroundColor: ur.map((r) => r.relief_rate < u.relief_other ? "#b91c1c" : "#14161a"), borderRadius: 3, barPercentage: 0.7 }] },
+  options: { indexAxis: "y", responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false }, tooltip: { ...tip, callbacks: { label: (c) => ` ${c.parsed.x.toFixed(0)}% got relief (${fmt(ur[c.dataIndex].complaints)} complaints)` } } },
+    scales: { x: { ...ax("% closed with relief", (v) => v + "%"), min: 0, max: 60 }, y: { grid: { display: false }, ticks: { color: "#14161a" } } } } });
+let sortKey = "complaints", sortDir = -1;
+const title = (s) => s.replace(/\b(inc|n\.a|llc|co)\b\.?/gi, (m) => m.toUpperCase()).replace(/\b\w/g, (c) => c.toUpperCase());
+function drawCompanies() {
+  const rows = [...M.companies].sort((a, b2) => (a[sortKey] > b2[sortKey] ? 1 : -1) * sortDir).slice(0, 15);
+  const maxC = Math.max(...M.companies.map((r) => r.complaints));
+  const h = (k, l, cls = "n") => `<th class="${cls} sortable" data-k="${k}" aria-sort="${sortKey === k ? (sortDir < 0 ? "descending" : "ascending") : "none"}">${l}${sortKey === k ? (sortDir < 0 ? " ↓" : " ↑") : ""}</th>`;
+  $("companies").innerHTML = `<thead><tr><th>Company</th>${h("complaints", "Complaints")}${h("relief_rate", "Relief")}${h("urgent_share", "Urgent")}</tr></thead><tbody>` +
+    rows.map((r) => `<tr><td>${esc(title(r.company))}<div style="font-size:12px;color:var(--ink-3)">${r.top_product}</div></td>
+      <td class="n"><span class="minibar" style="width:${Math.round(r.complaints / maxC * 70)}px"></span>${fmt(r.complaints)}</td><td class="n">${pct(r.relief_rate)}</td><td class="n">${pct(r.urgent_share)}</td></tr>`).join("") + "</tbody>";
+}
+$("companies").addEventListener("click", (e) => { const th2 = e.target.closest("th[data-k]"); if (!th2) return; const k = th2.dataset.k; sortDir = sortKey === k ? -sortDir : -1; sortKey = k; drawCompanies(); });
+drawCompanies();
+
+$("foot").innerHTML = `<div>Data: CFPB Consumer Complaint Database (public domain), archived narratives ${d.window_start} to ${d.window_end}, sampled ${fmt(d.per_month)} per month. Company counts reflect this sample, not the full database, and a complaint is an allegation, not a finding.</div><div>Portfolio project by <a href="https://madhubuddaraju.github.io/">madhubuddaraju</a> · <a href="https://github.com/madhubuddaraju/consumer-complaints-nlp">source code</a></div>`;
+</script>
+</body>
+</html>
