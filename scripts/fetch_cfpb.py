@@ -27,7 +27,7 @@ HEADERS = {"User-Agent": "consumer-complaints-nlp research project (github.com/m
 
 # mirror column -> canonical CFPB column name
 RENAME = {
-    "complaint_id": "Complaint ID", "date_received": "Date received", "product": "Product", "sub_product": "Sub-product",
+    "complaint_id": "Complaint ID", "date_received": "Date received", "date": "Date received", "product": "Product", "sub_product": "Sub-product",
     "issue": "Issue", "sub_issue": "Sub-issue", "consumer_complaint_narrative": "Consumer complaint narrative",
     "company": "Company", "state": "State", "tags": "Tags", "submitted_via": "Submitted via",
     "company_response_to_consumer": "Company response to consumer", "timely_response": "Timely response?",
@@ -75,8 +75,9 @@ def main() -> None:
     sample = (window.groupby("month", group_keys=False)
                     .apply(lambda g: g.sample(min(len(g), a.per_month), random_state=42))
                     .drop(columns="month").sort_values("Date received"))
-    for c in ["Complaint ID"]:
-        sample[c] = sample[c].astype(str)
+    if "Complaint ID" not in sample:  # the mirror drops the CFPB id; derive a stable one from the record
+        key = sample["Date received"].astype(str) + sample["Company"].astype(str) + sample["Consumer complaint narrative"].str[:200]
+        sample.insert(0, "Complaint ID", key.map(lambda k: hashlib.sha1(k.encode()).hexdigest()[:12]))
     out = Path(a.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     sample.to_csv(out, index=False, compression="gzip")
