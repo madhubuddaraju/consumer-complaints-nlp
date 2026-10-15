@@ -27,7 +27,8 @@ HEADERS = {"User-Agent": "consumer-complaints-nlp research project (github.com/m
 
 # mirror column -> canonical CFPB column name
 RENAME = {
-    "complaint_id": "Complaint ID", "date_received": "Date received", "date": "Date received", "product": "Product", "sub_product": "Sub-product",
+    "complaint_id": "Complaint ID", "date_received": "Date received", "date": "Date received",
+    "product": "Product", "sub_product": "Sub-product",
     "issue": "Issue", "sub_issue": "Sub-issue", "consumer_complaint_narrative": "Consumer complaint narrative",
     "company": "Company", "state": "State", "tags": "Tags", "submitted_via": "Submitted via",
     "company_response_to_consumer": "Company response to consumer", "timely_response": "Timely response?",
