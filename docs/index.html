@@ -253,7 +253,7 @@ const themeLabel = (terms) => { const out = []; for (const t of terms) { if (!ou
 
 // ---- header ----------------------------------------------------------------------------
 const d = M.data, t = M.templates, u = M.urgency, b = M.baseline;
-$("mastMeta").innerHTML = `${fmt(d.kept)} complaints · ${d.months[0]} to ${d.months[1]} · <a href="https://github.com/madhubuddaraju/consumer-complaints-nlp">code</a>`;
+$("mastMeta").innerHTML = `${fmt(d.kept)} complaints · ${d.months[0]} to ${d.months[1]} · <a href="https://github.com/subbarajubuddaraju/consumer-complaints-nlp">code</a>`;
 $("h1").textContent = `What ${fmt(Math.round(d.kept / 1000) * 1000)} consumer complaints say about America's lenders`;
 $("dek").textContent = `An NLP read of narratives filed with the Consumer Financial Protection Bureau: which product each complaint is about, how many are copied form letters, which problems are growing, and whether urgent harms get help. The CFPB stopped publishing these narratives in August 2026; this analysis uses an archived copy.`;
 const best = B && B.macro_f1 > b.macro_f1 ? B : null;
@@ -354,7 +354,7 @@ function drawCompanies() {
 $("companies").addEventListener("click", (e) => { const th2 = e.target.closest("th[data-k]"); if (!th2) return; const k = th2.dataset.k; sortDir = sortKey === k ? -sortDir : -1; sortKey = k; drawCompanies(); });
 drawCompanies();
 
-$("foot").innerHTML = `<div>Data: CFPB Consumer Complaint Database (public domain), archived narratives ${d.window_start} to ${d.window_end}, sampled ${fmt(d.per_month)} per month. Company counts reflect this sample, not the full database, and a complaint is an allegation, not a finding.</div><div>Portfolio project by <a href="https://madhubuddaraju.github.io/">V R S Subbaraju Buddaraju</a> · <a href="https://github.com/madhubuddaraju/consumer-complaints-nlp">source code</a></div>`;
+$("foot").innerHTML = `<div>Data: CFPB Consumer Complaint Database (public domain), archived narratives ${d.window_start} to ${d.window_end}, sampled ${fmt(d.per_month)} per month. Company counts reflect this sample, not the full database, and a complaint is an allegation, not a finding.</div><div>Portfolio project by <a href="https://subbarajubuddaraju.github.io/">V R S Subbaraju Buddaraju</a> · <a href="https://github.com/subbarajubuddaraju/consumer-complaints-nlp">source code</a></div>`;
 </script>
 </body>
 </html>

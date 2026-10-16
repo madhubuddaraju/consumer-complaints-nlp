@@ -1,11 +1,11 @@
 # Consumer Complaint Intelligence
 
-![CI](https://github.com/madhubuddaraju/consumer-complaints-nlp/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/subbarajubuddaraju/consumer-complaints-nlp/actions/workflows/ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/python-3.12-blue)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-1.x-F7931E)
 ![Transformers](https://img.shields.io/badge/DistilBERT-fine--tuned-yellow)
 
-**Live dashboard: [madhubuddaraju.github.io/consumer-complaints-nlp](https://madhubuddaraju.github.io/consumer-complaints-nlp/)**
+**Live dashboard: [subbarajubuddaraju.github.io/consumer-complaints-nlp](https://subbarajubuddaraju.github.io/consumer-complaints-nlp/)**
 (paste a complaint and watch the model route it, in your browser)
 
 An NLP system over **53,276 real consumer complaints** filed with the U.S. Consumer Financial Protection Bureau
@@ -85,7 +85,7 @@ flowchart LR
 ## Quick start
 
 ```bash
-git clone https://github.com/madhubuddaraju/consumer-complaints-nlp.git
+git clone https://github.com/subbarajubuddaraju/consumer-complaints-nlp.git
 cd consumer-complaints-nlp
 python -m venv .venv && source .venv/bin/activate
 make install

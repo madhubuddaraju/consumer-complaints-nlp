@@ -23,7 +23,7 @@ import requests
 
 MIRROR = "https://huggingface.co/datasets/sovai/cfpb_complaints/resolve/main/cfpb_complaints.parquet"
 OFFICIAL = "https://files.consumerfinance.gov/ccdb/complaints.csv.zip"
-HEADERS = {"User-Agent": "consumer-complaints-nlp research project (github.com/madhubuddaraju/consumer-complaints-nlp)"}
+HEADERS = {"User-Agent": "consumer-complaints-nlp research project (github.com/subbarajubuddaraju/consumer-complaints-nlp)"}
 
 # mirror column -> canonical CFPB column name
 RENAME = {
