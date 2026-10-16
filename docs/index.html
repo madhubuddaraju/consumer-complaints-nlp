@@ -354,7 +354,7 @@ function drawCompanies() {
 $("companies").addEventListener("click", (e) => { const th2 = e.target.closest("th[data-k]"); if (!th2) return; const k = th2.dataset.k; sortDir = sortKey === k ? -sortDir : -1; sortKey = k; drawCompanies(); });
 drawCompanies();
 
-$("foot").innerHTML = `<div>Data: CFPB Consumer Complaint Database (public domain), archived narratives ${d.window_start} to ${d.window_end}, sampled ${fmt(d.per_month)} per month. Company counts reflect this sample, not the full database, and a complaint is an allegation, not a finding.</div><div>Portfolio project by <a href="https://madhubuddaraju.github.io/">madhubuddaraju</a> · <a href="https://github.com/madhubuddaraju/consumer-complaints-nlp">source code</a></div>`;
+$("foot").innerHTML = `<div>Data: CFPB Consumer Complaint Database (public domain), archived narratives ${d.window_start} to ${d.window_end}, sampled ${fmt(d.per_month)} per month. Company counts reflect this sample, not the full database, and a complaint is an allegation, not a finding.</div><div>Portfolio project by <a href="https://madhubuddaraju.github.io/">V R S Subbaraju Buddaraju</a> · <a href="https://github.com/madhubuddaraju/consumer-complaints-nlp">source code</a></div>`;
 </script>
 </body>
 </html>
